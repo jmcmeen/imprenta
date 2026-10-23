@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-23
+
 ### Added
 
 - **The content arranger.** `content/<name>.md` files are arranged into products by
@@ -39,3 +41,4 @@ All notable changes to this project are documented here. The format is based on
   every product with a product screen for sync-free publishing fields, variant
   subscriptions, builds and outputs.
 - **API.** `imprenta.Project` as the entry point: catalogs, targets, build, check.
+
