@@ -1,0 +1,76 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "imprenta"
+dynamic = ["version"]
+authors = [
+  { name="John McMeen", email="johnmcmeen@gmail.com" },
+]
+description = "A content arranger and styler: markdown in, products (PDF, EPUB) out, arranged by a catalog"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+keywords = ["publishing", "pandoc", "pagedjs", "pdf", "epub", "markdown", "catalog", "arranger"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Text Processing :: Markup :: Markdown",
+    "Topic :: Office/Business",
+]
+
+# The engine needs only YAML: PyYAML to read catalogs, ruamel.yaml to edit them
+# in place without losing comments. Rendering is done by external tools
+# (pandoc, pagedjs-cli, Chrome) that a content repo installs itself.
+dependencies = [
+    "pyyaml>=6.0",
+    "ruamel.yaml>=0.18",
+]
+
+[project.scripts]
+imprenta = "imprenta.cli:main"
+
+[project.optional-dependencies]
+tui = [
+  "textual>=3.0",
+]
+dev = [
+  "pytest>=7.0",
+  "pytest-asyncio>=0.23",
+  "pytest-cov",
+  "ruff>=0.17,<0.18",  # pinned: minor releases change formatting; upgrade on purpose
+  "textual>=3.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/jmcmeen/imprenta"
+Source = "https://github.com/jmcmeen/imprenta"
+Changelog = "https://github.com/jmcmeen/imprenta/blob/main/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/jmcmeen/imprenta/issues"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/imprenta"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
