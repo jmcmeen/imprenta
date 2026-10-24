@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-24
+
 ### Added
 
 - **`imprenta new DIR [--name NAME] [--pin VERSION]`** writes the starter project: a catalog, lorem
