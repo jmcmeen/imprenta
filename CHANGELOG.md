@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+
+- **`imprenta new DIR [--name NAME] [--pin VERSION]`** writes the starter project: a catalog, lorem
+  ipsum content with term tables, a theme (`leaflet` and `volume`), `scripts/fetch_fonts.py`,
+  the Makefile, the Node pin for pagedjs-cli and a check workflow, with `pyproject.toml`
+  pinned to the engine that wrote it. The starter ships inside the package
+  (`imprenta/data/starter/`) and the test suite checks it, so it cannot drift from the
+  engine. It replaces the separate imprenta-template repo. To see what a release changed
+  in the starter, write it into a scratch folder with the new engine and diff.
+
 ## [0.1.0] - 2026-10-23
 
 ### Added

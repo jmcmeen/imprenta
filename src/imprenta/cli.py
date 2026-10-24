@@ -1,5 +1,6 @@
 """The command line: a thin layer over Project.
 
+    imprenta new DIR [--name NAME] [--pin VERSION]
     imprenta build [spec …] [--force] [--jobs N] [--tag T] [--html | --preview]
     imprenta check
     imprenta status
@@ -19,6 +20,7 @@ import sys
 
 from . import __version__
 from .build import BuildError
+from .new import pin_version, scaffold
 from .project import Project, ProjectNotFound
 from .targets import SpecError, Target
 
@@ -28,6 +30,19 @@ def project_or_exit() -> Project:
         return Project.find()
     except ProjectNotFound as e:
         sys.exit(str(e))
+
+
+def cmd_new(args) -> int:
+    pin = args.pin or pin_version()
+    try:
+        dest = scaffold(args.dir, args.name, pin)
+    except FileExistsError as e:
+        sys.exit(str(e))
+    print(f"Wrote the starter project to {dest}, pinned to imprenta {pin}.")
+    if not args.pin and pin != __version__:
+        print(f"Note: this engine is a development build ({__version__}); {pin} may not be released yet (--pin).")
+    print(f"Next: cd {dest} && git init && make setup && make")
+    return 0
 
 
 def cmd_build(args) -> int:
@@ -124,6 +139,12 @@ def cmd_manager(args) -> int:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="imprenta", description="Arrange content into products and render them.")
     sub = ap.add_subparsers(dest="command", required=True)
+
+    n = sub.add_parser("new", help="write the starter project into a new folder")
+    n.add_argument("dir", help="the folder to create (or an empty one)")
+    n.add_argument("--name", help="the project name (default: the folder's name)")
+    n.add_argument("--pin", help="the imprenta release to pin (default: this engine's)")
+    n.set_defaults(fn=cmd_new)
 
     b = sub.add_parser("build", help="build targets: specs, or everything the catalogs subscribe")
     b.add_argument("spec", nargs="*", help="<catalog> | <product> | <catalog>/<product>, each optionally .<variant>")

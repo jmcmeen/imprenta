@@ -1,0 +1,38 @@
+/* Palette layer: printer-friendly grayscale. Loaded after print.css.
+   White paper, no tinted fills, no dark cover, images desaturated, so a buyer
+   can print on a home printer without draining a cartridge. Structure
+   (borders, rules, weights) carries the hierarchy that color carried. */
+:root {
+  --paper:      #ffffff;
+  --ink:        #111111;
+  --ink-soft:   #444444;
+  --surface:    #ffffff;
+  --surface2:   #eeeeee;
+  --border:     #bbbbbb;
+
+  --gold:       #333333;
+  --gold-deep:  #222222;
+  --red:        #222222;
+  --green:      #222222;
+
+  /* the cover goes light in every product */
+  --cover-bg:   #ffffff;
+  --cover-ink:  #111111;
+  --cover-gold: #222222;
+  --cover-muted:#555555;
+}
+
+/* a solid rule instead of the gold fade under section heads */
+main h1 {
+  border-image: none;
+  border-bottom: 2px solid var(--ink);
+}
+
+/* cards and callouts keep their left rule and outline, drop the fill */
+.entry { background: none; border-left-color: var(--ink); }
+.caution { background: none; border-color: #777777; border-left-color: var(--ink); }
+
+/* zebra rows stay faint; header fill goes */
+main thead th { background: none; }
+
+img { filter: grayscale(1); }

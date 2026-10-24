@@ -1,0 +1,8 @@
+{
+  "name": "{{name}}",
+  "private": true,
+  "description": "Pinned Node tooling for the PDF build: pagedjs-cli (Paged.js in headless Chrome).",
+  "devDependencies": {
+    "pagedjs-cli": "0.4.3"
+  }
+}

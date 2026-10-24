@@ -41,9 +41,18 @@ src/imprenta/
   targets.py   Target, all_targets, affected_targets, changed_since, spec parsing
   check.py     the validator (content rules + catalog rules)
   edit.py      round-trip catalog editing
+  new.py       `imprenta new`: writes data/starter/ into a folder, pin = this engine's version
   cli.py       argparse entry point; tui.py  the manager (textual, optional)
   data/toc.lua the pandoc filter behind the positional table of contents
-tests/         pytest; conftest builds a two-catalog sample project in tmp_path
+  data/starter/ the starter project `imprenta new` writes (catalog, lorem ipsum content,
+               theme, Makefile, package.json, dot-github/, dot-gitignore). It is data:
+               ruff skips it, `dot-<name>` becomes `.<name>` on the way out, and
+               `{{name}}` / `{{version}}` are filled in pyproject.toml, package.json,
+               README.md and CLAUDE.md. A change to what a content repo needs (a catalog
+               field, a Makefile target, a CI step) is made here in the same commit and
+               noted in the CHANGELOG, since content repos diff a fresh starter to upgrade.
+tests/         pytest; conftest builds a two-catalog sample project in tmp_path;
+               test_new.py scaffolds the starter and checks it
 ```
 
 ## Working here

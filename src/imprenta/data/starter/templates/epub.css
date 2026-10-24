@@ -1,0 +1,84 @@
+/* epub.css — the imprenta-template theme, reflowable EPUB stylesheet.
+   The PDF side is print.css; this is its reflowable sibling: same tokens
+   and components, no page geometry, generous wrapping so dense term tables
+   survive a phone screen. The build prepends the brand @font-face rules
+   (fonts embedded in the EPUB) and appends a palette layer if the variant
+   names one, so palettes/mono.css also works for e-ink. */
+
+:root {
+  --paper:      #faf4e6;
+  --ink:        #2a2012;
+  --ink-soft:   #6b5a44;
+  --surface:    #f1e7d2;
+  --surface2:   #ece0c6;
+  --border:     #e0d2b4;
+  --gold:       #f5a623;
+  --gold-deep:  #a8650f;
+  --red:        #c0392b;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body:    "Outfit", system-ui, sans-serif;
+}
+
+/* Reader apps own the page color; we only ask for the brand type. */
+body {
+  font-family: var(--font-body);
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0 5%;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  line-height: 1.15;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+h1 { font-weight: 900; font-size: 1.7em; color: var(--gold-deep);
+     margin: 1.4em 0 0.5em; padding-bottom: 0.2em; border-bottom: 2px solid var(--gold); }
+h2 { font-weight: 700; font-size: 1.3em; margin: 1.2em 0 0.35em; }
+h3 { font-weight: 700; font-size: 1.1em; margin: 1em 0 0.25em; }
+
+/* pandoc's title page */
+#title-page-header, .title { font-family: var(--font-display); font-weight: 900; color: var(--ink); }
+.subtitle { font-family: var(--font-body); font-weight: 300; color: var(--ink-soft); }
+.author, .date { font-family: var(--font-body); color: var(--ink-soft); }
+
+p { margin: 0 0 0.7em; }
+hr { display: none; }           /* section rules: the heading underline does this job */
+em { color: inherit; }
+strong { font-weight: 600; }
+a { color: var(--gold-deep); text-decoration: none; }
+
+/* Term tables: let cells wrap, keep rules so rows track across. */
+table { width: 100%; border-collapse: collapse; margin: 0.8em 0; font-size: 0.85em; }
+th, td { border: 1px solid var(--border); padding: 0.35em 0.45em; text-align: left; vertical-align: top; }
+thead th { background: var(--surface2); font-family: var(--font-display); font-weight: 700;
+           border-bottom: 2px solid var(--gold-deep); }
+tbody tr:nth-child(even) { background: var(--surface); }
+
+/* Term entry card (same markup as print.css) */
+.entry { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--gold);
+         border-radius: 8px; padding: 0.5em 0.7em; margin: 0 0 0.7em; page-break-inside: avoid; }
+.entry .term { font-family: var(--font-display); font-weight: 700; font-size: 1.15em; margin-right: 0.4em; }
+.entry .gloss { font-size: 0.9em; font-style: italic; color: var(--ink-soft); }
+.entry .meaning { font-weight: 600; color: var(--gold-deep); }
+.entry .example { display: block; font-style: italic; color: var(--ink-soft); margin-top: 0.3em; }
+
+/* Caution callout */
+.caution { border: 1px solid var(--red); border-left-width: 3px; border-radius: 6px;
+           padding: 0.5em 0.7em; margin: 0.6em 0; font-size: 0.95em; page-break-inside: avoid; }
+.caution::before { content: "Handle with care"; display: block; font-size: 0.75em; font-weight: 700;
+                   letter-spacing: 0.08em; text-transform: uppercase; color: var(--red); margin-bottom: 0.2em; }
+.caution:lang(es)::before { content: "Manéjese con cuidado"; }
+
+.tag { display: inline-block; background: var(--surface2); border-radius: 20px; padding: 1px 9px;
+       font-size: 0.8em; color: var(--ink-soft); }
+blockquote { margin: 0.6em 0; padding: 0.1em 0 0.1em 0.8em; border-left: 2px solid var(--gold);
+             color: var(--ink-soft); font-style: italic; }
+
+/* pandoc's inline table of contents */
+#toc-title, nav#toc h1, nav.toc h1 { color: var(--gold-deep); border: none; }
+nav#toc ul, nav.toc ol { list-style: none; padding-left: 0; }
+nav#toc ul ul, nav.toc ol ol { padding-left: 1.2em; }
+nav#toc a, nav.toc a { color: var(--ink); text-decoration: none; }
+nav.toc .toc-leader { display: none; }   /* no pages in a reflowable EPUB */

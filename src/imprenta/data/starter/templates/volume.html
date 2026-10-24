@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html$if(lang)$ lang="$lang$"$endif$$if(variant)$ data-variant="$variant$" data-size="$size$" data-palette="$palette$"$endif$>
+<head>
+  <meta charset="utf-8">
+  <title>$title$</title>
+  <link rel="stylesheet" href="print.css">
+$if(size_css)$
+  <link rel="stylesheet" href="$size_css$">
+$endif$
+$if(palette_css)$
+  <link rel="stylesheet" href="$palette_css$">
+$endif$
+$if(preview)$
+  <!-- preview build: Paged.js paginates live in the browser (no PDF step) -->
+  <script src="$polyfill$"></script>
+$endif$
+</head>
+<body>
+  <main class="volume">
+$body$
+  </main>
+  <footer class="colophon">$if(edition)$v$edition$ · $endif$$date$ · $version$</footer>
+</body>
+</html>

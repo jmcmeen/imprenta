@@ -1,0 +1,75 @@
+# catalog.main.yaml — one catalog = one set of products arranged from content/.
+#
+# Everything is a name. content/<name>.md is the only kind of source file (a
+# chapter, a cover, a foreword … the catalog does not care which, and the
+# engine does not care what language or alphabet it is in). A product is an
+# ordered `parts` list of names, a `theme` (templates/<theme>.html) and its
+# own publishing fields; a `recipe` lets many products share one shape, with
+# `$name` standing for the product's own name. A part name resolves as a
+# generated part (`toc`, `terms`), then a group (expanded in place), then a
+# content file. A parts entry may carry settings: `- toc: {depth: 2}`, or for
+# any content part `{style: cover, toc: false}`.
+#
+# Publishing fields, on each product (inheriting `defaults`):
+#   status    draft | ready | published  (authoring note; gates version)
+#   version   the edition printed in the colophon, a quoted string ("0.1")
+#   variants  the render variants (see `rendering`) it is built in
+#   tags      plain words your own tooling can select on (imprenta build --tag …)
+# Outputs are flat: output/<product>.main.<variant>.<ext>.
+
+defaults:
+  variants: [letter-color]
+  tags: []
+
+rendering:
+  default: letter-color
+  variants:
+    letter-color: {renderer: pdf, size: letter, palette: color}   # screen / tablet copy
+    letter-mono:  {renderer: pdf, size: letter, palette: mono}    # printer-friendly copy
+    ebook:        {renderer: epub}                                # reflowable, for ebook stores
+  bundles:
+    print: [letter-color, letter-mono]
+    stores: [ebook]
+
+strings:
+  toc_title: "Contents"
+  terms_title: "Glossary"
+  terms_label: "Source"
+
+# Which table headers the glossary reads as which column (case-insensitive,
+# by substring). These are the defaults; add your own words.
+terms:
+  columns:
+    term: [term]
+    literal: [literal, origin]
+    meaning: [meaning]
+    example: [example, note]
+
+# Named, ordered selections of content files; a product's parts list uses them by name.
+groups:
+  chapters: [lorem, ipsum]
+
+# Recipes: a shape many products share. `$name` is the product's own name.
+recipes:
+  leaflet:
+    theme: leaflet
+    parts:
+      - $name-cover: {style: cover, toc: false}
+      - shared/welcome
+      - $name
+      - terms
+
+# Products: what gets built.
+products:
+  lorem: {recipe: leaflet, status: draft, version: "0.1", tags: [release]}
+  ipsum: {recipe: leaflet, status: draft, version: "0.1"}
+  omnibus:
+    theme: volume
+    version: "0.1"
+    parts:
+      - omnibus-cover: {style: cover, toc: false}
+      - toc: {depth: 2}
+      - shared/foreword
+      - chapters
+      - terms
+      - shared/colophon
