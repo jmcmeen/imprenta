@@ -65,6 +65,15 @@ tests/         pytest; conftest builds a two-catalog sample project in tmp_path;
   Add every user-visible change under `## [Unreleased]` in the same commit.
 - `publish.yml` publishes to PyPI on a release (trusted publishing, environment
   `pypi`). Content repos pin `imprenta==X.Y.Z`.
+- Docs: `mkdocs.yml` + `docs/`, MkDocs Material, published to GitHub Pages by
+  `docs.yml` on pushes to main (PRs only build). `docs/gen_pages.py` generates
+  the overview from README.md, the changelog page from CHANGELOG.md and the CLI
+  page from the argparse help (`cli.build_parser`); `docs/api.md` is
+  mkdocstrings over `Project`, `Catalog`, `Target`, so docstrings there are
+  the API reference. `make docs` builds strictly, `make docs-serve` previews.
+  Documentation-only changes (`docs/`, `mkdocs.yml`, any `.md`) skip CI, and
+  so cut no release; a manual minor/major release needs CI to have run on
+  main's head, so land a docs-only commit before a code commit, not after.
 - Tests never call pandoc or Chrome. Rendering is exercised from a content repo
   (`imprenta build`), the logic around it is what the suite covers.
 - The TUI builds through `python -m imprenta build …` in a worker thread so

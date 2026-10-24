@@ -36,7 +36,7 @@ def cmd_new(args) -> int:
     pin = args.pin or pin_version()
     try:
         dest = scaffold(args.dir, args.name, pin)
-    except FileExistsError as e:
+    except (FileExistsError, ValueError) as e:
         sys.exit(str(e))
     print(f"Wrote the starter project to {dest}, pinned to imprenta {pin}.")
     if not args.pin and pin != __version__:
@@ -136,7 +136,7 @@ def cmd_manager(args) -> int:
     return 0
 
 
-def main(argv=None) -> int:
+def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="imprenta", description="Arrange content into products and render them.")
     sub = ap.add_subparsers(dest="command", required=True)
 
@@ -169,6 +169,9 @@ def main(argv=None) -> int:
     sub.add_parser("doctor", help="check that every external tool is installed").set_defaults(fn=cmd_doctor)
     sub.add_parser("manager", help="the TUI (needs imprenta[tui])").set_defaults(fn=cmd_manager)
     sub.add_parser("version", help="print the version").set_defaults(fn=lambda a: print(__version__) or 0)
+    return ap
 
-    args = ap.parse_args(argv)
+
+def main(argv=None) -> int:
+    args = build_parser().parse_args(argv)
     return args.fn(args)

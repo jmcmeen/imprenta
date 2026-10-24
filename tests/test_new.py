@@ -30,14 +30,79 @@ def test_scaffold_writes_a_project_that_passes_check(tmp_path):
     assert warnings == []
 
 
-def test_scaffold_refuses_a_non_empty_folder(tmp_path):
+def test_scaffold_refuses_a_non_empty_folder_or_a_file(tmp_path):
     (tmp_path / "taken").mkdir()
     (tmp_path / "taken" / "note.txt").write_text("x")
     with pytest.raises(FileExistsError):
-        scaffold(tmp_path / "taken")
-    scaffold(tmp_path / "empty")  # a missing folder is created
+        scaffold(tmp_path / "taken", version="1.0.0")
+    (tmp_path / "file").write_text("x")
+    with pytest.raises(FileExistsError):
+        scaffold(tmp_path / "file", version="1.0.0")
+    scaffold(tmp_path / "empty", version="1.0.0")  # a missing folder is created
     (tmp_path / "bare").mkdir()
-    scaffold(tmp_path / "bare")  # an empty one is filled
+    scaffold(tmp_path / "bare", version="1.0.0")  # an empty one is filled
+    assert (tmp_path / "bare" / "catalog.main.yaml").is_file()
+    assert not [p for p in tmp_path.iterdir() if p.name.startswith(".")]  # no work folder left behind
+
+
+def test_scaffold_only_pins_a_release_number(tmp_path):
+    for bad in ("1.0.0 @ https://evil.example/x.whl", "1.0.0; extra", "latest", "1"):
+        with pytest.raises(ValueError):
+            scaffold(tmp_path / "x", version=bad)
+    assert not (tmp_path / "x").exists()
+
+
+def test_scaffold_leaves_nothing_behind_on_failure(tmp_path, monkeypatch):
+    import imprenta.new as new
+
+    def boom(src, dst, subs):
+        raise OSError("disk full")
+
+    monkeypatch.setattr(new, "_copy", boom)
+    with pytest.raises(OSError):
+        scaffold(tmp_path / "almanac", version="1.0.0")
+    assert list(tmp_path.iterdir()) == []
+    with pytest.raises(OSError):
+        scaffold(tmp_path / "deep" / "er" / "almanac", version="1.0.0")
+    assert list(tmp_path.iterdir()) == []  # the parents it made are gone too
+
+
+def test_scaffold_fills_the_current_directory(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    dest = scaffold(".", name="here", version="1.0.0")
+    assert dest == tmp_path
+    assert (tmp_path / "catalog.main.yaml").is_file()
+    assert 'name = "here"' in (tmp_path / "pyproject.toml").read_text()
+    assert not [
+        p for p in tmp_path.iterdir() if p.name.startswith(".") and p.name != ".github" and p.name != ".gitignore"
+    ]
+
+
+def test_scaffold_refuses_symlinks(tmp_path):
+    (tmp_path / "real").mkdir()
+    (tmp_path / "link").symlink_to(tmp_path / "real")
+    (tmp_path / "dangling").symlink_to(tmp_path / "nowhere")
+    for name in ("link", "dangling"):
+        with pytest.raises(FileExistsError):
+            scaffold(tmp_path / name, version="1.0.0")
+    assert list((tmp_path / "real").iterdir()) == []
+    assert not (tmp_path / "nowhere").exists()
+
+
+def test_scaffold_reports_a_destination_taken_during_the_copy(tmp_path, monkeypatch):
+    import imprenta.new as new
+
+    real_copy = new._copy
+
+    def copy_then_race(src, dst, subs):
+        real_copy(src, dst, subs)
+        (tmp_path / "almanac").mkdir(exist_ok=True)
+        (tmp_path / "almanac" / "theirs.txt").write_text("x")  # someone else got there first
+
+    monkeypatch.setattr(new, "_copy", copy_then_race)
+    with pytest.raises(FileExistsError):
+        scaffold(tmp_path / "almanac", version="1.0.0")
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["almanac"]  # theirs intact, our staging gone
 
 
 def test_cli_new(tmp_path, capsys):

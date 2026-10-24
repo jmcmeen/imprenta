@@ -79,22 +79,27 @@ class Catalog:
 
     @property
     def defaults(self) -> dict:
+        """The `defaults` section: publishing fields every product inherits."""
         return self.data.get("defaults") or {}
 
     @property
     def products(self) -> dict:
+        """The `products` section: name to definition, as written."""
         return self.data.get("products") or {}
 
     @property
     def groups(self) -> dict:
+        """The `groups` section: name to ordered list of content names."""
         return self.data.get("groups") or {}
 
     @property
     def recipes(self) -> dict:
+        """The `recipes` section: name to the shape (`theme`, `parts`) products share."""
         return self.data.get("recipes") or {}
 
     @property
     def strings(self) -> dict:
+        """The `strings` section: reader-facing labels for the generated parts and templates."""
         return dict(self.data.get("strings") or {})
 
     @property
@@ -109,6 +114,10 @@ class Catalog:
 
     @property
     def rendering(self) -> dict:
+        """The `rendering` section with `variants` and `bundles` always present.
+
+        `products` is accepted as the old name of `bundles`.
+        """
         cfg = dict(self.data.get("rendering") or {})
         cfg.setdefault("variants", {})
         cfg.setdefault("bundles", cfg.pop("products", {}))  # `products` is the old name
@@ -116,14 +125,17 @@ class Catalog:
 
     @property
     def variants(self) -> dict:
+        """Render variants by name: `{renderer, size, palette}`."""
         return self.rendering["variants"]
 
     @property
     def bundles(self) -> dict:
+        """Named groups of variants a sales channel ships together."""
         return self.rendering["bundles"]
 
     @property
     def default_variant(self) -> str | None:
+        """The variant a bare target name means, if the catalog sets one."""
         return self.rendering.get("default")
 
     def resolve_variant(self, name: str | None = None) -> str:
@@ -135,6 +147,7 @@ class Catalog:
         return name
 
     def variant_renderer(self, variant: str) -> str:
+        """`pdf` or `epub` for a variant (pdf when unstated)."""
         return self.variants[variant].get("renderer", "pdf")
 
     def variant_layers(self, variant: str) -> list[Path]:
@@ -196,9 +209,11 @@ class Catalog:
         return plan
 
     def theme(self, product: str) -> str:
+        """The product's theme name, from its definition or recipe, else the default."""
         return (self.product_def(product) or {}).get("theme") or DEFAULT_THEME
 
     def part_entries(self, product: str) -> list[tuple[str, dict]]:
+        """The product's parts list as `(name, settings)` pairs, before groups are expanded."""
         return normalize_parts((self.product_def(product) or {}).get("parts"))
 
     def resolve_parts(self, product: str) -> list[tuple[str, dict]]:

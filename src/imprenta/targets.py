@@ -39,12 +39,15 @@ RENDERER_FILES = {
 
 
 class Target(NamedTuple):
+    """One thing to build: a product of a catalog in one render variant."""
+
     catalog: str
     product: str
     variant: str
 
     @property
     def key(self) -> str:
+        """`catalog/product/variant`, the stable id a manifest or stamp records."""
         return f"{self.catalog}/{self.product}/{self.variant}"
 
     def __str__(self) -> str:

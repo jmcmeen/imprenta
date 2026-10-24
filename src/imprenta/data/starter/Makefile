@@ -51,10 +51,10 @@ help:
 	@sed -n '2,16p' Makefile | cut -c3-
 
 preview-%:
-	$(UV) imprenta build --preview $*
+	$(UV) imprenta build --preview '$*'
 
 # Anything else is a catalog, a product, or a product.variant: imprenta parses the name.
 %:
-	$(UV) imprenta build $@ $(FORCEFLAG)
+	$(UV) imprenta build '$@' $(FORCEFLAG)
 
 Makefile: ;
