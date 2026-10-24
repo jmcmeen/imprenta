@@ -1,0 +1,372 @@
+/* ============================================================
+   print.css  —  the imprenta-template theme, print/PDF stylesheet
+   Fraunces (display) + Outfit (body), warm palette, gold accent.
+
+   Design decision: the COVER uses a dark treatment for
+   impact; the INTERIOR uses a warm paper treatment built from the
+   same palette so long-form reading and printing stay comfortable.
+   To go fully dark inside, see the note at "FULLY DARK INTERIOR".
+   ============================================================ */
+
+/* Brand fonts (OFL licensed, so fine to embed in a sold PDF). Self-hosted in
+   templates/fonts/ (variable woff2, latin + latin-ext subsets) so builds are
+   reproducible offline; `make setup` downloads them from Google Fonts. */
+@import url("fonts/fonts.css");
+
+/* ---------- Brand tokens ---------- */
+:root {
+  /* Interior (warm paper) */
+  --paper:      #faf4e6;   /* warm cream page              */
+  --ink:        #2a2012;   /* deep warm brown body text     */
+  --ink-soft:   #6b5a44;   /* muted brown, secondary text   */
+  --surface:    #f1e7d2;   /* context boxes, entry tint     */
+  --surface2:   #ece0c6;   /* tags / chips                  */
+  --border:     #e0d2b4;   /* warm hairline                 */
+
+  /* Accent (carried straight from the app) */
+  --gold:       #f5a623;   /* brand gold, rules and accents */
+  --gold-deep:  #a8650f;   /* gold that reads on cream      */
+  --red:        #c0392b;   /* caution / 18+                 */
+  --green:      #2e8b57;   /* positive                      */
+
+  /* Cover (dark) */
+  --cover-bg:   #0f0a05;
+  --cover-ink:  #f0e6d3;
+  --cover-gold: #f5a623;
+  --cover-muted:#8a7660;
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body:    "Outfit", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+/* ---------- The page ---------- */
+@page {
+  size: letter;               /* 8.5x11in — fills standard US printer paper. Swap for "A4", or "6in 9in" for a book trim. */
+  margin: 0.9in 1in;          /* ~6.5in text column on Letter keeps a readable line length */
+  background: var(--paper);
+  @bottom-center {
+    content: counter(page);
+    font-family: var(--font-body);
+    font-size: 9pt;
+    color: var(--gold-deep);
+  }
+  @top-center {
+    content: string(runninghead);
+    font-family: var(--font-body);
+    font-size: 8pt;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+}
+/* the current section name feeds the running header (echoes the app eyebrow) */
+main h1 { string-set: runninghead content(text); }
+
+/* ---------- Cover: a content part with `style: cover` ----------
+   The cover is markdown like any other part — an eyebrow paragraph, the H1
+   title, an optional subtitle paragraph and author line — wrapped by the build
+   in <div class="part style-cover">. These rules give it the dark
+   treatment on the volume theme and the light paper treatment on the leaflet
+   theme (main.leaflet). */
+@page cover {
+  margin: 0;
+  background: var(--cover-bg);
+  @top-center { content: none; }
+  @bottom-center { content: none; }
+}
+.style-cover {
+  page: cover;
+  position: relative;
+  background: var(--cover-bg);
+  color: var(--cover-ink);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0 0.9in;
+}
+.style-cover > p { margin: 0; }
+/* eyebrow: the paragraph before the title */
+.style-cover > p:first-child {
+  font-family: var(--font-body);
+  font-size: 11pt;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cover-gold);
+  margin-bottom: 0.35in;
+}
+/* title: the part's H1, freed from the section-heading rules below */
+main .style-cover h1 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 34pt;
+  line-height: 1.02;
+  color: var(--cover-ink);
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+/* italicize a word in the title (e.g. "... *Ipsum*") to get the gold accent */
+.style-cover h1 em { font-style: italic; color: var(--cover-gold); }
+/* subtitle: the paragraph after the title; author: the one after that */
+.style-cover > h1 + p {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 13pt;
+  color: var(--cover-muted);
+  margin-top: 0.4in;
+}
+.style-cover > h1 + p + p {
+  font-family: var(--font-body);
+  font-size: 11pt;
+  color: var(--cover-muted);
+  margin-top: 0.7in;
+}
+
+/* ---------- Cover, light variant — the leaflet theme ----------
+   A volume keeps the dark cover above. A leaflet (main.leaflet) uses the same
+   warm paper as the interior so it opens quietly; the accent survives as the eyebrow. */
+@page cover-light {
+  margin: 0;
+  background: var(--paper);
+  @top-center { content: none; }
+  @bottom-center { content: none; }
+}
+main.leaflet .style-cover {
+  page: cover-light;
+  background: var(--paper);
+  color: var(--ink);
+}
+main.leaflet .style-cover > p:first-child { color: var(--gold-deep); }
+main.leaflet .style-cover h1 { color: var(--ink); }
+main.leaflet .style-cover h1 em { color: var(--gold-deep); }
+main.leaflet .style-cover > h1 + p { color: var(--ink-soft); }
+main.leaflet .style-cover > h1 + p + p { color: var(--ink-soft); }
+
+/* ---------- Body typography ---------- */
+body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: var(--ink);
+  background: var(--paper);
+  font-size: 10.8pt;
+  line-height: 1.55;
+}
+main p { margin: 0 0 0.62em; orphans: 2; widows: 2; }
+
+/* Colophon: edition · build date · git version, a quiet last line after the
+   body (never on the cover). break-inside keeps it with the final page. */
+.colophon {
+  margin-top: 2.4em;
+  padding-top: 0.8em;
+  border-top: 1px solid var(--ink-soft);
+  font-size: 8pt;
+  letter-spacing: 0.08em;
+  text-align: center;
+  color: var(--ink-soft);
+  break-inside: avoid;
+}
+
+/* the intro paragraph right under a part's title, set a touch larger */
+main .part:not(.style-cover) h1 + p { font-size: 11.6pt; color: var(--ink); }
+
+/* H1 = the title of a part: a chapter's own title (every body starts with
+   one), a shared part (foreword, caveats, …) or the glossary. Each starts on a
+   fresh page in every product; sections are h2 and flow down the page. The
+   gold accent rule echoes the app card's gradient top border. */
+main h1 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 19pt;
+  line-height: 1.1;
+  color: var(--gold-deep);
+  margin: 0 0 0.5em;
+  padding-bottom: 0.28em;
+  border-bottom: 2px solid;
+  border-image: linear-gradient(90deg, var(--gold) 0%, transparent 75%) 1;
+}
+/* every part starts a fresh page — except a cover, which is a page of its own
+   already. The break sits on the part's wrapper div, not its H1: a div that
+   starts on the page after the cover and then breaks before its H1 would leave
+   that page blank. (Paged.js matches break rules by selector, so the cover is
+   excluded here rather than reset below.) */
+main .part:not(.style-cover) { break-before: page; }
+main h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14pt;
+  color: var(--ink);
+  margin: 1.3em 0 0.35em;
+}
+main h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12pt;
+  color: var(--ink);
+  margin: 1.05em 0 0.25em;
+}
+
+/* Never strand a heading at the foot of a page: keep each heading with the
+   content that follows it. If the heading's first line of content won't fit
+   beneath it, the heading is pushed to the next page too (it won't sit alone). */
+main h1,
+main h2,
+main h3 { break-after: avoid; break-inside: avoid; }
+
+/* Bodies use `---` (an <hr>) to separate sections, but each section heading
+   already carries its own gold underline, so the rule is redundant — and with
+   sections flowing it could otherwise be stranded alone on a page. Hide it. */
+main hr { display: none; }
+
+main em { color: inherit; }
+main strong { font-weight: 600; }
+a { color: var(--gold-deep); text-decoration: none; }
+
+/* ---------- Tables (term / glossary lists) ----------
+   Ruled cells so dense multi-column term tables are easy to track across. */
+main table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.8em 0;
+  font-size: 9.4pt;
+}
+main th,
+main td {
+  border: 1px solid var(--border);
+  padding: 0.34em 0.5em;
+  text-align: left;
+  vertical-align: top;
+}
+main thead th {
+  background: var(--surface2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--ink);
+  border-bottom: 2px solid var(--gold-deep);
+}
+main tbody tr:nth-child(even) { background: var(--surface); }
+/* A long table repeats its header row on each new page and never splits a row. */
+main thead { display: table-header-group; }
+main tr { break-inside: avoid; }
+
+/* ---------- Term entry card ----------
+   Author entries as Pandoc fenced divs so each stays whole on the page
+   and picks up the card styling. Inline spans give the colored parts:
+
+   :::entry
+   [Chévere]{.term} [chévere · "cool"]{.gloss}
+
+   [Cool, great, awesome.]{.meaning} Express that something is great.
+
+   [¡Qué chévere que viniste!]{.example}
+   :::
+*/
+.entry {
+  break-inside: avoid;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: 10px;
+  padding: 0.5em 0.7em 0.55em;
+  margin: 0 0 0.7em;
+}
+.entry .term {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14pt;
+  color: var(--ink);
+  margin-right: 0.4em;
+}
+.entry .gloss { font-size: 9.5pt; font-style: italic; color: var(--ink-soft); }
+.entry .meaning { font-weight: 600; color: var(--gold-deep); }
+.entry .example {
+  display: block;
+  font-style: italic;
+  color: var(--ink-soft);
+  margin-top: 0.3em;
+}
+
+/* ---------- Caution callout (for the "recognize, don't deploy" flags) ----------
+   :::caution
+   Marico reads as warm "bro" among friends but lands as a slur to a stranger.
+   :::
+*/
+.caution {
+  break-inside: avoid;
+  background: rgba(192, 57, 43, 0.08);
+  border: 1px solid rgba(192, 57, 43, 0.35);
+  border-left: 3px solid var(--red);
+  border-radius: 8px;
+  padding: 0.5em 0.7em;
+  margin: 0.6em 0;
+  font-size: 10pt;
+}
+.caution::before {
+  content: "Handle with care";   /* per-language labels follow, keyed on <html lang> */
+  display: block;
+  font-family: var(--font-body);
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 0.2em;
+}
+.caution:lang(es)::before { content: "Manéjese con cuidado"; }
+
+/* ---------- Tags / chips ---------- */
+.tag {
+  display: inline-block;
+  background: var(--surface2);
+  border-radius: 20px;
+  padding: 1px 9px;
+  font-size: 8.5pt;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+/* ---------- Block quotes / proverbs ---------- */
+blockquote {
+  margin: 0.6em 0;
+  padding: 0.1em 0 0.1em 0.8em;
+  border-left: 2px solid var(--gold);
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+/* ---------- Table of contents (the positional `toc` part) ----------
+   scripts/toc.lua emits <nav class="toc"> with nested <ol> lists; its title is
+   an h1 like any other part (so it starts a fresh page and sets the running
+   head). Page numbers are resolved by Paged.js from each link's target. */
+.toc { break-after: page; }
+.toc ol { list-style: none; padding-left: 0; margin: 0; }
+.toc ol.toc-l2 { padding-left: 1.4em; }
+.toc ol.toc-l3 { padding-left: 2.8em; }
+.toc li { margin: 0.18em 0; break-inside: avoid; }
+.toc a { display: flex; align-items: baseline; color: var(--ink); text-decoration: none; }
+.toc .toc-l1 > li > a { font-family: var(--font-display); font-weight: 700; margin-top: 0.55em; }
+.toc .toc-l2 > li > a { font-size: 9.6pt; color: var(--ink-soft); }
+.toc .toc-text { flex: 0 1 auto; }
+.toc .toc-leader { flex: 1 1 auto; min-width: 1em; margin: 0 0.4em; border-bottom: 1px dotted var(--ink-soft); transform: translateY(-0.25em); }
+.toc-pages a::after { content: target-counter(attr(href url), page); font-variant-numeric: tabular-nums; flex: none; }
+.toc:not(.toc-pages) .toc-leader { display: none; }
+
+/* ============================================================
+   FULLY DARK INTERIOR (optional)
+   If you would rather match the app exactly, dark pages and all,
+   delete the interior tokens above and use these instead:
+
+   --paper: #0f0a05;  --ink: #f0e6d3;  --ink-soft: #8a7660;
+   --surface: #1a1108;  --surface2: #231a0c;  --border: #3a2c14;
+   --gold-deep: #f5a623;
+
+   and in @page set  background: #0f0a05;  and change the page-number
+   color to var(--gold). Everything else carries over unchanged.
+   Note: dark full-bleed pages use a lot of ink if a buyer prints.
+   ============================================================ */

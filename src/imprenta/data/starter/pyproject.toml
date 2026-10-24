@@ -1,0 +1,17 @@
+[project]
+name = "{{name}}"
+version = "0.0.0"
+description = "A content repo arranged and rendered by imprenta."
+requires-python = ">=3.10"
+dependencies = [
+    "imprenta[tui]=={{version}}",   # the engine; bump on purpose, with its release notes open
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+# A content repo, not an installable package: uv manages the dependencies only.
+[tool.uv]
+package = false

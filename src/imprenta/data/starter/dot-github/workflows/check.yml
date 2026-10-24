@@ -1,0 +1,33 @@
+# Check: on every push and pull request, validate the content and the catalogs.
+# Nothing is rendered here, so it needs neither Chrome nor pagedjs-cli.
+name: check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync
+      - run: uv run imprenta check
+
+      # Template releases only (self-neutralising in repos made from the template):
+      # the project version and a release tag must both equal the imprenta pin.
+      - name: Template version matches the imprenta pin
+        if: github.repository == 'jmcmeen/imprenta-template'
+        run: |
+          pin=$(sed -n 's/.*"imprenta\[tui\]==\([^"]*\)".*/\1/p' pyproject.toml)
+          version=$(sed -n 's/^version = "\([^"]*\)".*/\1/p' pyproject.toml)
+          test -n "$pin" || { echo "no imprenta pin in pyproject.toml"; exit 1; }
+          test "$version" = "$pin" \
+            || { echo "project version $version does not match the imprenta pin $pin"; exit 1; }
+          case "$GITHUB_REF" in
+            refs/tags/*) test "$GITHUB_REF_NAME" = "v$pin" \
+              || { echo "tag $GITHUB_REF_NAME does not match the imprenta pin $pin"; exit 1; } ;;
+          esac

@@ -13,8 +13,15 @@ pip install 'imprenta[tui]'     # plus the manager, a terminal dashboard
 Rendering is done by tools a content repo installs itself: [pandoc](https://pandoc.org),
 [pagedjs-cli](https://pagedjs.org) (Paged.js in headless Chrome) and a Chrome
 or Chromium. `imprenta doctor` says which are missing. The quickest start is
-the [imprenta-template](https://github.com/jmcmeen/imprenta-template) repo,
-which has all of this wired up around some lorem ipsum.
+the starter project the engine writes for you:
+
+```sh
+uvx imprenta new my-series      # a catalog, lorem ipsum content, a theme, Makefile and CI
+cd my-series && git init && make setup && make
+```
+
+The starter is pinned to the engine that wrote it, and it is the project the
+engine's own tests exercise, so it is always set up for that release.
 
 ## The model
 
@@ -110,6 +117,7 @@ imprenta build main/april.ebook     # one catalog's product, one variant (subscr
 imprenta build --tag release        # only tagged products
 imprenta build --preview main/april # HTML with the Paged.js polyfill, for a live browser preview
 imprenta check                      # content and catalog rules; exit 1 on an error
+imprenta new DIR [--name NAME] [--pin VERSION]   # write the starter project into a new or empty folder
 imprenta status                     # every product of every catalog
 imprenta affected --since <commit>  # the targets a change set rebuilds (for incremental CI)
 imprenta doctor                     # pandoc, node, pagedjs-cli, Chrome, theme fonts
@@ -154,5 +162,5 @@ the product with its parts, settings, every variant's output, and the controls:
 A theme is `templates/<theme>.html` (a pandoc template wrapping `$body$`) plus
 `templates/print.css`, `templates/epub.css`, `templates/sizes/<size>.css`,
 `templates/palettes/<palette>.css` and `templates/fonts/`. A product picks its
-theme by name; a variant picks the size and palette layers. The template repo
-ships a complete theme to start from.
+theme by name; a variant picks the size and palette layers. `imprenta new`
+writes a complete theme to start from.

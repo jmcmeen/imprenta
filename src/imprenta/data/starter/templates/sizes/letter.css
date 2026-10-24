@@ -1,0 +1,6 @@
+/* Size layer: US Letter (8.5 x 11 in), the home-printer default.
+   Loaded after print.css; only page geometry belongs here. */
+@page {
+  size: letter;
+  margin: 0.9in 1in;          /* ~6.5in text column keeps a readable line length */
+}
