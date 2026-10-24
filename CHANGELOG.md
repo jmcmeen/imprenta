@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-24
+
 ### Added
 
 - **Documentation site** at <https://jmcmeen.github.io/imprenta/>: the README, the
