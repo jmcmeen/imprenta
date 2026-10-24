@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import re
 import shutil
+import tempfile
 from importlib.resources import files
 from pathlib import Path
 
@@ -19,6 +20,7 @@ from . import __version__
 
 TEMPLATED = ("pyproject.toml", "package.json", "README.md", "CLAUDE.md")
 DOT = "dot-"
+RELEASE = re.compile(r"\d+(\.\d+){1,2}$")  # X.Y or X.Y.Z: what goes after `==` in the pin
 
 
 def starter_dir() -> Path:
@@ -32,14 +34,31 @@ def pin_version(version: str = __version__) -> str:
 
 
 def scaffold(dest: Path | str, name: str | None = None, version: str | None = None) -> Path:
-    """Write the starter into `dest` (missing or empty). Returns the destination."""
+    """Write the starter into `dest` (missing or empty). Returns the destination.
+
+    The pin must be a release number, since it lands verbatim after `==` in the
+    generated pyproject.toml. The copy is made beside `dest` and moved into place
+    when complete, so a failure leaves nothing half-written there.
+    """
     dest = Path(dest)
-    if dest.exists() and any(dest.iterdir()):
+    if dest.exists() and not dest.is_dir():
+        raise FileExistsError(f"{dest} exists and is not a folder")
+    if dest.is_dir() and any(dest.iterdir()):
         raise FileExistsError(f"{dest} exists and is not empty")
     name = name or dest.resolve().name
     version = version or pin_version()
-    dest.mkdir(parents=True, exist_ok=True)
-    _copy(starter_dir(), dest, {"{{name}}": name, "{{version}}": version})
+    if not RELEASE.fullmatch(version):
+        raise ValueError(f"not a release number: {version!r} (expected X.Y.Z)")
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    work = Path(tempfile.mkdtemp(prefix=f".{dest.name}-", dir=dest.parent))
+    try:
+        _copy(starter_dir(), work, {"{{name}}": name, "{{version}}": version})
+        if dest.is_dir():
+            dest.rmdir()  # empty, checked above
+        work.rename(dest)
+    except BaseException:
+        shutil.rmtree(work, ignore_errors=True)
+        raise
     return dest
 
 

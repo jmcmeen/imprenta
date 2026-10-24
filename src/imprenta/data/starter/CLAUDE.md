@@ -36,13 +36,6 @@ and rendering; this repo holds content, a theme and a catalog.
 
 Bump `imprenta[tui]==X.Y.Z` in `pyproject.toml` with that release's notes open,
 run `uv lock`, then `make`. The engine's CHANGELOG lists catalog changes a
-release needs. A template release of the same number, if there is one, lists
-the Makefile, CI and theme changes that go with it (README, "Versions").
-
-## Template versioning
-
-Template `vX.Y.Z` means "set up for imprenta X.Y.Z": the pin is the one
-version, and the project version and the release tag must equal it (CI checks,
-only in the template repo itself). Patch releases of the engine get no template
-release. A release is a `CHANGELOG.md` entry, a merge to `main`, and a tag on
-the merge commit. Never tag unless asked.
+release needs and says when the starter files (Makefile, CI, theme) changed
+with it: run `imprenta new` into a scratch folder with the new engine and diff
+it against this repo to see the exact lines (README, "Upgrading the engine").

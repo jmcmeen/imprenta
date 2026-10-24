@@ -52,8 +52,17 @@ dev = [
   "textual>=3.0",
 ]
 
+[dependency-groups]
+docs = [
+  "mkdocs-material>=9.5",
+  "mkdocstrings[python]>=0.26",
+  "mkdocs-gen-files>=0.5",
+  "ruff>=0.17,<0.18",   # mkdocstrings formats signatures with it
+]
+
 [project.urls]
 Homepage = "https://github.com/jmcmeen/imprenta"
+Documentation = "https://jmcmeen.github.io/imprenta/"
 Source = "https://github.com/jmcmeen/imprenta"
 Changelog = "https://github.com/jmcmeen/imprenta/blob/main/CHANGELOG.md"
 "Bug Tracker" = "https://github.com/jmcmeen/imprenta/issues"

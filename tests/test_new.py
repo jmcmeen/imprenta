@@ -30,14 +30,38 @@ def test_scaffold_writes_a_project_that_passes_check(tmp_path):
     assert warnings == []
 
 
-def test_scaffold_refuses_a_non_empty_folder(tmp_path):
+def test_scaffold_refuses_a_non_empty_folder_or_a_file(tmp_path):
     (tmp_path / "taken").mkdir()
     (tmp_path / "taken" / "note.txt").write_text("x")
     with pytest.raises(FileExistsError):
-        scaffold(tmp_path / "taken")
-    scaffold(tmp_path / "empty")  # a missing folder is created
+        scaffold(tmp_path / "taken", version="1.0.0")
+    (tmp_path / "file").write_text("x")
+    with pytest.raises(FileExistsError):
+        scaffold(tmp_path / "file", version="1.0.0")
+    scaffold(tmp_path / "empty", version="1.0.0")  # a missing folder is created
     (tmp_path / "bare").mkdir()
-    scaffold(tmp_path / "bare")  # an empty one is filled
+    scaffold(tmp_path / "bare", version="1.0.0")  # an empty one is filled
+    assert (tmp_path / "bare" / "catalog.main.yaml").is_file()
+    assert not [p for p in tmp_path.iterdir() if p.name.startswith(".")]  # no work folder left behind
+
+
+def test_scaffold_only_pins_a_release_number(tmp_path):
+    for bad in ("1.0.0 @ https://evil.example/x.whl", "1.0.0; extra", "latest", "1"):
+        with pytest.raises(ValueError):
+            scaffold(tmp_path / "x", version=bad)
+    assert not (tmp_path / "x").exists()
+
+
+def test_scaffold_leaves_nothing_behind_on_failure(tmp_path, monkeypatch):
+    import imprenta.new as new
+
+    def boom(src, dst, subs):
+        raise OSError("disk full")
+
+    monkeypatch.setattr(new, "_copy", boom)
+    with pytest.raises(OSError):
+        scaffold(tmp_path / "almanac", version="1.0.0")
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_cli_new(tmp_path, capsys):

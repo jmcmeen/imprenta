@@ -6,6 +6,25 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+
+- **Documentation site** at <https://jmcmeen.github.io/imprenta/>: the README, the
+  command line help rendered from the parser, the `Project` / `Catalog` / `Target` API
+  from docstrings, and the changelog. Built with MkDocs Material (`make docs`,
+  `make docs-serve`, dependency group `docs`) and published by `docs.yml` on pushes to
+  main. Documentation-only changes skip CI and so cut no release.
+- `imprenta new --pin` accepts only a release number (`X.Y` or `X.Y.Z`), since the
+  value lands after `==` in the generated `pyproject.toml`.
+
+### Fixed
+
+- The starter written by `imprenta new` no longer carries the old template repo's
+  versioning rules in its `CLAUDE.md` and check workflow.
+- `imprenta new` builds the project beside the destination and moves it into place
+  when complete, so an interrupted run leaves nothing half-written; a destination that
+  is a file is refused with a message instead of a traceback.
+- The starter Makefile quotes the goal it hands to `imprenta build`.
+
 ## [0.1.1] - 2026-10-24
 
 ### Added

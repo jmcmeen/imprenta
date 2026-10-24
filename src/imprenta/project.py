@@ -25,6 +25,12 @@ class ProjectNotFound(FileNotFoundError):
 
 
 class Project:
+    """A folder holding `content/`, `templates/` and one or more `catalog.<name>.yaml`.
+
+    Everything the command line and the manager do goes through one of these:
+    find the catalogs, list targets, build them, check the rules.
+    """
+
     def __init__(self, root: Path | str):
         self.root = Path(root).resolve()
         self.content = self.root / "content"
@@ -46,6 +52,7 @@ class Project:
         raise ProjectNotFound(f"No catalog.<name>.yaml found in {here} or any parent folder")
 
     def rel(self, path: Path) -> str:
+        """A path relative to the project root when it is inside it, else as given."""
         try:
             return str(path.relative_to(self.root))
         except ValueError:
@@ -54,9 +61,11 @@ class Project:
     # ----- catalogs -----
 
     def catalog_path(self, name: str) -> Path:
+        """Where `catalog.<name>.yaml` lives, whether or not it exists."""
         return self.root / f"catalog.{name}.yaml"
 
     def catalog_names(self) -> list[str]:
+        """The `<name>` of every `catalog.<name>.yaml` in the root, sorted."""
         return sorted(m.group(1) for p in self.root.glob("catalog.*.yaml") if (m := CATALOG_FILE.match(p.name)))
 
     def catalog(self, name: str) -> Catalog:
@@ -73,6 +82,7 @@ class Project:
         return cat
 
     def catalogs(self) -> dict[str, Catalog]:
+        """Every catalog, parsed, by name."""
         return {n: self.catalog(n) for n in self.catalog_names()}
 
     # ----- content -----
@@ -94,15 +104,19 @@ class Project:
         return sorted(out)
 
     def content_label(self, name: str) -> str:
+        """The short name a glossary prints for a content file: its `label`, or one derived from the name."""
         return str(content.read_meta(self.content_path(name)).get("label") or content.default_label(name))
 
     def word_count(self, name: str) -> int:
+        """Words in a content file's prose, ignoring front matter and author notes."""
         return content.word_count(self.content_path(name))
 
     def product_words(self, cat: Catalog, product: str) -> int:
+        """Words across every content file a product's parts resolve to."""
         return sum(self.word_count(n) for n in cat.content_names(product))
 
     def theme_template(self, theme: str) -> Path:
+        """`templates/<theme>.html`; raises FileNotFoundError if the theme has none."""
         path = self.templates / f"{theme}.html"
         if not path.exists():
             raise FileNotFoundError(f"Theme '{theme}' has no {self.rel(path)}")
@@ -123,14 +137,20 @@ class Project:
         return affected_targets(changed, cats, only, tag, old_cats=catalogs_at(self, commit))
 
     def affected(self, changed, only=None, tag=None, old_cats=None) -> list[Target]:
+        """Targets a set of changed paths affects, judged against the current catalogs (and `old_cats`, if given)."""
         return affected_targets(changed, self.catalogs(), only, tag, old_cats)
 
     def spec_targets(self, spec: str) -> list[Target]:
+        """Targets a spec names: `<catalog>`, `<product>` or `<catalog>/<product>`, each optionally `.<variant>`."""
         return spec_targets(self, spec)
 
     # ----- building -----
 
     def build(self, target: Target, *, pdf=True, preview=False, force=False, log=print) -> Path:
+        """Build one target and return its output path; skipped when up to date unless `force`.
+
+        `pdf=False` stops at the HTML; `preview` adds the Paged.js polyfill to it for a live browser preview.
+        """
         from .build import build
 
         return build(self, Target(*target), pdf=pdf, preview=preview, force=force, log=log)
@@ -144,11 +164,16 @@ class Project:
     # ----- checks -----
 
     def check(self) -> tuple[list[str], list[str]]:
+        """Validate content and catalogs against the rules: `(errors, warnings)`, each a list of messages."""
         from .check import run
 
         return run(self)
 
     def doctor(self):
+        """`[(tool, where it was found or None, how to get it)]` for every external tool.
+
+        Pandoc, node, pagedjs-cli, Chrome or Chromium, and the theme fonts.
+        """
         from .render import doctor
 
         return doctor(self)

@@ -1,5 +1,11 @@
 # imprenta
 
+[![PyPI](https://img.shields.io/pypi/v/imprenta)](https://pypi.org/project/imprenta/)
+[![Python](https://img.shields.io/pypi/pyversions/imprenta)](https://pypi.org/project/imprenta/)
+[![CI](https://github.com/jmcmeen/imprenta/actions/workflows/ci.yml/badge.svg)](https://github.com/jmcmeen/imprenta/actions/workflows/ci.yml)
+[![Docs](https://github.com/jmcmeen/imprenta/actions/workflows/docs.yml/badge.svg)](https://jmcmeen.github.io/imprenta/)
+[![License](https://img.shields.io/pypi/l/imprenta)](LICENSE)
+
 A content arranger and styler. Markdown files go in, products (PDF and EPUB)
 come out, and a catalog says how the one becomes the other. imprenta knows
 content, parts, groups, recipes, products, themes and render variants. It
@@ -22,6 +28,26 @@ cd my-series && git init && make setup && make
 
 The starter is pinned to the engine that wrote it, and it is the project the
 engine's own tests exercise, so it is always set up for that release.
+
+## Dependencies
+
+The engine is small. Python 3.10 or newer, two libraries, and the rendering
+tools a content repo installs itself.
+
+| | what | why |
+| --- | --- | --- |
+| Python packages | [PyYAML](https://pyyaml.org) | reads the catalogs |
+| | [ruamel.yaml](https://yaml.readthedocs.io) | edits catalogs in place without losing comments (`imprenta.edit`, the manager) |
+| Extras | `imprenta[tui]`: [Textual](https://textual.textualize.io) | the manager, a terminal dashboard |
+| | `imprenta[dev]`: pytest, pytest-asyncio, pytest-cov, ruff | working on the engine |
+| | `--group docs`: MkDocs Material, mkdocstrings, mkdocs-gen-files | building the documentation site |
+| External tools | [pandoc](https://pandoc.org) | markdown to HTML, and the EPUB writer |
+| | [Node.js](https://nodejs.org) 18+ with [pagedjs-cli](https://pagedjs.org) | Paged.js in headless Chrome renders HTML to PDF; a content repo pins it in `package.json` (the starter does) |
+| | Chrome or Chromium | the browser pagedjs-cli drives; found on `PATH` or in `/Applications`, or set `PUPPETEER_EXECUTABLE_PATH` |
+
+The external tools are not Python packages, so pip does not install them.
+`imprenta doctor` reports which are missing, and the starter's `make setup`
+checks them after installing the rest.
 
 ## The model
 

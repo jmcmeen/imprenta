@@ -254,3 +254,8 @@ jobs:
           if [ -f .github/workflows/publish.yml ]; then
             gh workflow run publish.yml --ref "$TAG"
           fi
+          # Likewise the changelog commit fires no push event, so the docs site
+          # would miss the new release notes until the next merge.
+          if [ -f .github/workflows/docs.yml ]; then
+            gh workflow run docs.yml --ref main
+          fi

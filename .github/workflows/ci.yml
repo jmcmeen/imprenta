@@ -1,10 +1,27 @@
 name: CI
 
+# Documentation-only changes skip CI on purpose: release.yml runs after a green
+# CI on main, so a docs change that ran CI would cut a release with nothing in
+# it. docs.yml builds and publishes those changes instead.
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "**.md"
+      - "LICENSE"
+      - "CITATION.cff"
+      - ".github/workflows/docs.yml"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "**.md"
+      - "LICENSE"
+      - "CITATION.cff"
+      - ".github/workflows/docs.yml"
   workflow_dispatch:
 
 permissions:
