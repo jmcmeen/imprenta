@@ -62,6 +62,47 @@ def test_scaffold_leaves_nothing_behind_on_failure(tmp_path, monkeypatch):
     with pytest.raises(OSError):
         scaffold(tmp_path / "almanac", version="1.0.0")
     assert list(tmp_path.iterdir()) == []
+    with pytest.raises(OSError):
+        scaffold(tmp_path / "deep" / "er" / "almanac", version="1.0.0")
+    assert list(tmp_path.iterdir()) == []  # the parents it made are gone too
+
+
+def test_scaffold_fills_the_current_directory(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    dest = scaffold(".", name="here", version="1.0.0")
+    assert dest == tmp_path
+    assert (tmp_path / "catalog.main.yaml").is_file()
+    assert 'name = "here"' in (tmp_path / "pyproject.toml").read_text()
+    assert not [
+        p for p in tmp_path.iterdir() if p.name.startswith(".") and p.name != ".github" and p.name != ".gitignore"
+    ]
+
+
+def test_scaffold_refuses_symlinks(tmp_path):
+    (tmp_path / "real").mkdir()
+    (tmp_path / "link").symlink_to(tmp_path / "real")
+    (tmp_path / "dangling").symlink_to(tmp_path / "nowhere")
+    for name in ("link", "dangling"):
+        with pytest.raises(FileExistsError):
+            scaffold(tmp_path / name, version="1.0.0")
+    assert list((tmp_path / "real").iterdir()) == []
+    assert not (tmp_path / "nowhere").exists()
+
+
+def test_scaffold_reports_a_destination_taken_during_the_copy(tmp_path, monkeypatch):
+    import imprenta.new as new
+
+    real_copy = new._copy
+
+    def copy_then_race(src, dst, subs):
+        real_copy(src, dst, subs)
+        (tmp_path / "almanac").mkdir(exist_ok=True)
+        (tmp_path / "almanac" / "theirs.txt").write_text("x")  # someone else got there first
+
+    monkeypatch.setattr(new, "_copy", copy_then_race)
+    with pytest.raises(FileExistsError):
+        scaffold(tmp_path / "almanac", version="1.0.0")
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["almanac"]  # theirs intact, our staging gone
 
 
 def test_cli_new(tmp_path, capsys):

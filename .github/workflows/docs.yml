@@ -34,8 +34,10 @@ permissions:
   contents: read
 
 concurrency:
+  # PR runs supersede each other; main runs queue, so an older run never
+  # cancels a newer deployment.
   group: docs-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -61,22 +63,36 @@ jobs:
         run: uv run mkdocs build --strict
 
       - name: Upload site
-        if: github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
   deploy:
     name: deploy
-    if: github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pages: write
       id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Still the head of main?
+        id: head
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          head=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)
+          if [ "$head" != "$GITHUB_SHA" ]; then
+            echo "::notice::main moved on to $head; the run for it deploys instead of this one ($GITHUB_SHA)."
+            echo "current=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          fi
       - id: deployment
+        if: steps.head.outputs.current == 'true'
         uses: actions/deploy-pages@v4

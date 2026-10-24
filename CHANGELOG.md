@@ -21,8 +21,10 @@ All notable changes to this project are documented here. The format is based on
 - The starter written by `imprenta new` no longer carries the old template repo's
   versioning rules in its `CLAUDE.md` and check workflow.
 - `imprenta new` builds the project beside the destination and moves it into place
-  when complete, so an interrupted run leaves nothing half-written; a destination that
-  is a file is refused with a message instead of a traceback.
+  when complete, so an interrupted run leaves nothing half-written, not even parent
+  folders it created; `imprenta new .` fills an empty current directory; a destination
+  that is a file or a symlink, or that something else filled meanwhile, is refused with
+  a message instead of a traceback.
 - The starter Makefile quotes the goal it hands to `imprenta build`.
 
 ## [0.1.1] - 2026-10-24
